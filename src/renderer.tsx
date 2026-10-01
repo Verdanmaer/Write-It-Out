@@ -1,11 +1,12 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Editor } from './components/Editor';
+import './index.css';
 
-function App() {
+export function App() {
   return (
-    <main>
-      <h1>Write It Out</h1>
-      <p>Write freely. Let it disappear.</p>
+    <main className="h-screen">
+      <Editor />
     </main>
   );
 }
