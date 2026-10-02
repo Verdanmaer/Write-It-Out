@@ -4,6 +4,7 @@ type Character = {
   id: number;
   value: string;
   expiresAt: number;
+  expired: boolean;
 };
 
 type UseDisappearingTextOptions = {
@@ -49,6 +50,7 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
           id: nextId.current++,
           value,
           expiresAt: Date.now() + lifetime,
+          expired: false,
         })),
       );
 
@@ -69,7 +71,18 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
     const interval = setInterval(() => {
       const now = Date.now();
 
-      setCharacters((current) => current.filter((character) => character.expiresAt > now));
+      setCharacters((current) =>
+        current.map((character) => {
+          if (character.expiresAt <= now) {
+            return {
+              ...character,
+              expired: true,
+            };
+          }
+
+          return character;
+        }),
+      );
     }, 100);
 
     return () => clearInterval(interval);
@@ -77,6 +90,7 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
 
   return {
     text,
+    characters,
     handleChange,
   };
 }
