@@ -10,7 +10,12 @@ export function Editor() {
         aria-hidden="true"
       >
         {characters.map((character) => (
-          <span key={character.id} className={character.expired ? 'opacity-0' : ''}>
+          <span
+            key={character.id}
+            className={`transition-opacity duration-500 ${
+              character.expired ? 'opacity-0' : 'opacity-100'
+            }`}
+          >
             {character.value}
           </span>
         ))}
