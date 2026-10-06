@@ -4,9 +4,11 @@ import { Editor } from './components/Editor';
 import './index.css';
 import { useState } from 'react';
 import { initialSession, type WritingSession } from './session/session';
+import { useSessionTimer } from './session/useSessionTimer';
 
 export function App() {
   const [session, setSession] = useState<WritingSession>(initialSession);
+  useSessionTimer({ session, setSession });
 
   return (
     <main className="h-screen">
@@ -23,6 +25,6 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <App />
+    <App />,
   </StrictMode>,
 );

@@ -7,6 +7,7 @@ export interface WritingSession {
   status: SessionStatus;
   duration: number | null;
   remainingTime: number | null;
+  startedAt: number | null;
 }
 
 export const initialSession: WritingSession = {
@@ -14,4 +15,5 @@ export const initialSession: WritingSession = {
   status: 'idle',
   duration: null,
   remainingTime: null,
+  startedAt: null,
 };
