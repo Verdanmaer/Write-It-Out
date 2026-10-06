@@ -8,7 +8,7 @@ import { useSessionTimer } from './session/useSessionTimer';
 
 export function App() {
   const [session, setSession] = useState<WritingSession>(initialSession);
-  useSessionTimer({ session, setSession });
+  const remainingTime = useSessionTimer({ session, setSession });
 
   return (
     <main className="h-screen">
