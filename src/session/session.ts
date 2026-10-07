@@ -10,8 +10,37 @@ export interface WritingSession {
 }
 
 export const initialSession: WritingSession = {
-  mode: 'free',
+  mode: 'timed',
   status: 'idle',
-  duration: null,
+  duration: 60000,
   startedAt: null,
 };
+
+export function startSession(session: WritingSession): WritingSession {
+  return {
+    ...session,
+    status: 'running',
+    startedAt: Date.now(),
+  };
+}
+
+export function pauseSession(session: WritingSession): WritingSession {
+  return {
+    ...session,
+    status: 'paused',
+  };
+}
+
+export function resumeSession(session: WritingSession): WritingSession {
+  return {
+    ...session,
+    status: 'running',
+  };
+}
+
+export function stopSession(session: WritingSession): WritingSession {
+  return {
+    ...session,
+    status: 'finished',
+  };
+}

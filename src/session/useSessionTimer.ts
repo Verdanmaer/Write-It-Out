@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { WritingSession } from './session';
 
 interface UseSessionTimerProps {
@@ -8,21 +8,27 @@ interface UseSessionTimerProps {
 
 export function useSessionTimer({ session, setSession }: UseSessionTimerProps) {
   const [remainingTime, setRemainingTime] = useState(session.duration ?? 0);
+  const lastTick = useRef<number | null>(null);
 
   useEffect(() => {
-    if (session.status !== 'running' || session.mode !== 'timed' || session.startedAt === null) {
+    if (session.status !== 'running' || session.mode !== 'timed') {
+      lastTick.current = null;
       return;
     }
 
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - session.startedAt!;
-      const remaining = Math.max(0, (session.duration ?? 0) - elapsed);
+    lastTick.current = Date.now();
 
-      setRemainingTime(remaining);
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = now - (lastTick.current ?? now);
+
+      lastTick.current = now;
+
+      setRemainingTime((time) => Math.max(0, time - elapsed));
     }, 100);
 
     return () => clearInterval(interval);
-  }, [session.status, session.mode, session.startedAt, session.duration, setSession]);
+  }, [session.status, session.mode]);
 
   return remainingTime;
 }
