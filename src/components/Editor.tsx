@@ -1,12 +1,26 @@
 import { useDisappearingText } from '../hooks/useDisappearingText';
+import { DisappearanceSpeed, EditorSettings } from '../settings/editorSettings';
 
-export function Editor() {
-  const { text, characters, handleChange } = useDisappearingText({ lifetime: 5000 });
+type EditorProps = {
+  settings: EditorSettings;
+};
+
+const disappearanceLifetimes = {
+  [DisappearanceSpeed.SLOW]: 8000,
+  [DisappearanceSpeed.MEDIUM]: 5000,
+  [DisappearanceSpeed.FAST]: 3000,
+};
+
+export function Editor({ settings }: EditorProps) {
+  const { text, characters, handleChange } = useDisappearingText({
+    lifetime: disappearanceLifetimes[settings.disappearanceSpeed],
+  });
 
   return (
     <div className="relative h-full w-full">
       <div
-        className="pointer-events-none absolute inset-0 whitespace-pre-wrap p-8 text-lg"
+        className="pointer-events-none absolute inset-0 whitespace-pre-wrap p-8"
+        style={{ fontSize: `${settings.fontSize}px` }}
         aria-hidden="true"
       >
         {characters.map((character) => (
@@ -22,7 +36,8 @@ export function Editor() {
       </div>
 
       <textarea
-        className="absolute inset-0 h-full w-full resize-none bg-transparent p-8 text-lg text-transparent caret-black outline-none"
+        className="absolute inset-0 h-full w-full resize-none bg-transparent p-8 text-transparent caret-black outline-none"
+        style={{ fontSize: `${settings.fontSize}px` }}
         value={text}
         onChange={handleChange}
         placeholder="Start writing..."
