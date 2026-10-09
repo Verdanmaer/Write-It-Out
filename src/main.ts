@@ -1,11 +1,54 @@
-import { app, BrowserWindow } from 'electron';
-import path from 'node:path';
+import { app, BrowserWindow, Menu } from 'electron';
 import started from 'electron-squirrel-startup';
+import path from 'node:path';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
+
+const createMenu = () => {
+  const menu = Menu.buildFromTemplate([
+    {
+      label: 'File',
+      submenu: [{ role: 'quit' }],
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' },
+      ],
+    },
+    {
+      label: 'View',
+      submenu: [
+        {
+          label: 'Editor Settings...',
+          accelerator: 'CmdOrCtrl+,',
+          click: () => {
+            BrowserWindow.getFocusedWindow()?.webContents.send('editor-settings:open');
+          },
+        },
+        { type: 'separator' },
+        { role: 'reload' },
+        { role: 'toggleDevTools' },
+        { role: 'togglefullscreen' },
+      ],
+    },
+    {
+      label: 'Window',
+      submenu: [{ role: 'minimize' }, { role: 'close' }],
+    },
+  ]);
+
+  Menu.setApplicationMenu(menu);
+};
 
 const createWindow = () => {
   // Create the browser window.
@@ -32,6 +75,7 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  createMenu();
   createWindow();
 
   // On OS X it's common to re-create a window in the app when the

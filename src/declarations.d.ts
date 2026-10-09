@@ -1,2 +1,9 @@
-/// <reference types="@electron-forge/plugin-vite/forge-vite-env" />
-declare module '*.css';
+declare global {
+  interface Window {
+    electronAPI: {
+      onOpenEditorSettings: (callback: () => void) => () => void;
+    };
+  }
+}
+
+export {};
