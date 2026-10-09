@@ -12,6 +12,41 @@ export function App() {
   const remainingTime = useSessionTimer({ session, setSession });
   const [editorSettings, setEditorSettings] = useState<EditorSettings>(initialEditorSettings);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    window.electronAPI
+      .loadEditorSettings()
+      .then((settings) => {
+        if (cancelled === false) {
+          setEditorSettings(settings);
+          setSettingsLoaded(true);
+        }
+      })
+      .catch((error: unknown) => {
+        console.error('Failed to load editor settings:', error);
+
+        if (cancelled === false) {
+          setSettingsLoaded(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (settingsLoaded === false) {
+      return;
+    }
+
+    window.electronAPI.saveEditorSettings(editorSettings).catch((error: unknown) => {
+      console.error('Failed to save editor settings:', error);
+    });
+  }, [editorSettings, settingsLoaded]);
 
   useEffect(() => {
     return window.electronAPI.onOpenEditorSettings(() => {

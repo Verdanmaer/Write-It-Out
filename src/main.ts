@@ -1,7 +1,7 @@
-import { app, BrowserWindow, Menu } from 'electron';
+import { app, BrowserWindow, Menu, ipcMain } from 'electron';
+import { readFile, writeFile } from 'node:fs/promises';
 import started from 'electron-squirrel-startup';
 import path from 'node:path';
-
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
@@ -49,6 +49,76 @@ const createMenu = () => {
 
   Menu.setApplicationMenu(menu);
 };
+
+const defaultEditorSettings = {
+  fontSize: 18,
+  disappearanceSpeed: 'medium',
+};
+
+const settingsPath = () => path.join(app.getPath('userData'), 'editor-settings.json');
+
+ipcMain.handle('editor-settings:load', async () => {
+  try {
+    const contents = await readFile(settingsPath(), 'utf8');
+    const saved: unknown = JSON.parse(contents);
+
+    if (typeof saved !== 'object' || saved === null) {
+      return defaultEditorSettings;
+    }
+
+    const value = saved as Record<string, unknown>;
+
+    return {
+      fontSize:
+        typeof value.fontSize === 'number' &&
+        Number.isInteger(value.fontSize) &&
+        value.fontSize >= 12 &&
+        value.fontSize <= 32
+          ? value.fontSize
+          : defaultEditorSettings.fontSize,
+      disappearanceSpeed:
+        value.disappearanceSpeed === 'slow' ||
+        value.disappearanceSpeed === 'medium' ||
+        value.disappearanceSpeed === 'fast'
+          ? value.disappearanceSpeed
+          : defaultEditorSettings.disappearanceSpeed,
+    };
+  } catch {
+    // The file may not exist on the first launch.
+    return defaultEditorSettings;
+  }
+});
+
+ipcMain.handle('editor-settings:save', async (_event, settings: unknown) => {
+  if (typeof settings !== 'object' || settings === null) {
+    throw new Error('Invalid editor settings');
+  }
+
+  const value = settings as Record<string, unknown>;
+
+  if (
+    typeof value.fontSize !== 'number' ||
+    Number.isInteger(value.fontSize) === false ||
+    value.fontSize < 12 ||
+    value.fontSize > 32 ||
+    ['slow', 'medium', 'fast'].includes(String(value.disappearanceSpeed)) === false
+  ) {
+    throw new Error('Invalid editor settings');
+  }
+
+  await writeFile(
+    settingsPath(),
+    JSON.stringify(
+      {
+        fontSize: value.fontSize,
+        disappearanceSpeed: value.disappearanceSpeed,
+      },
+      null,
+      2,
+    ),
+    'utf8',
+  );
+});
 
 const createWindow = () => {
   // Create the browser window.

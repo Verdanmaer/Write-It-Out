@@ -14,4 +14,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.removeListener('editor-settings:open', listener);
     };
   },
+
+  loadEditorSettings: () => ipcRenderer.invoke('editor-settings:load'),
+
+  saveEditorSettings: (settings: {
+    fontSize: number;
+    disappearanceSpeed: 'slow' | 'medium' | 'fast';
+  }) => ipcRenderer.invoke('editor-settings:save', settings),
 });
