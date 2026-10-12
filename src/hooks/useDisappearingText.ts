@@ -11,14 +11,20 @@ type UseDisappearingTextOptions = {
   lifetime: number;
 };
 
+const MAX_GRACE_PERIOD = 2000;
+const DISTANCE_RADIUS = 40;
+
 export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
   const [characters, setCharacters] = useState<Character[]>([]);
   const nextId = useRef(0);
+  const cursorIndex = useRef(0);
 
   const text = characters.map((character) => character.value).join('');
 
   function handleChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
     const newText = event.target.value;
+
+    cursorIndex.current = event.target.selectionStart;
 
     if (newText.length < text.length) {
       const deletedCharacters = text.length - newText.length;
@@ -67,13 +73,26 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
     );
   }
 
+  function handleCursorChange(event: React.SyntheticEvent<HTMLTextAreaElement>) {
+    cursorIndex.current = event.currentTarget.selectionStart;
+  }
+
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
 
       setCharacters((current) =>
-        current.map((character) => {
-          if (character.expiresAt <= now) {
+        current.map((character, index) => {
+          if (character.expired === true) {
+            return character;
+          }
+
+          const distance = Math.abs(index - cursorIndex.current);
+          const proximity = Math.max(0, 1 - distance / DISTANCE_RADIUS);
+          const gracePeriod = MAX_GRACE_PERIOD * proximity;
+          const adjustedExpiresAt = character.expiresAt + gracePeriod;
+
+          if (adjustedExpiresAt <= now) {
             return {
               ...character,
               expired: true,
@@ -92,5 +111,6 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
     text,
     characters,
     handleChange,
+    handleCursorChange,
   };
 }

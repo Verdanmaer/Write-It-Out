@@ -12,7 +12,7 @@ const disappearanceLifetimes = {
 };
 
 export function Editor({ settings }: EditorProps) {
-  const { text, characters, handleChange } = useDisappearingText({
+  const { text, characters, handleChange, handleCursorChange } = useDisappearingText({
     lifetime: disappearanceLifetimes[settings.disappearanceSpeed],
   });
 
@@ -40,6 +40,9 @@ export function Editor({ settings }: EditorProps) {
         style={{ fontSize: `${settings.fontSize}px` }}
         value={text}
         onChange={handleChange}
+        onSelect={handleCursorChange}
+        onClick={handleCursorChange}
+        onKeyUp={handleCursorChange}
         placeholder="Start writing..."
         spellCheck={false}
         autoFocus
