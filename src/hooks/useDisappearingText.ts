@@ -20,6 +20,7 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
   const cursorIndex = useRef(0);
 
   const text = characters.map((character) => character.value).join('');
+  const hasUnexpiredCharacters = characters.some((character) => character.expired === false);
 
   function handleChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
     const newText = event.target.value;
@@ -78,11 +79,17 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
   }
 
   useEffect(() => {
+    if (hasUnexpiredCharacters === false) {
+      return;
+    }
+
     const interval = setInterval(() => {
       const now = Date.now();
 
-      setCharacters((current) =>
-        current.map((character, index) => {
+      setCharacters((current) => {
+        let hasChanges = false;
+
+        const updatedCharacters = current.map((character, index) => {
           if (character.expired === true) {
             return character;
           }
@@ -93,6 +100,8 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
           const adjustedExpiresAt = character.expiresAt + gracePeriod;
 
           if (adjustedExpiresAt <= now) {
+            hasChanges = true;
+
             return {
               ...character,
               expired: true,
@@ -100,12 +109,18 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
           }
 
           return character;
-        }),
-      );
+        });
+
+        if (hasChanges === false) {
+          return current;
+        }
+
+        return updatedCharacters;
+      });
     }, 100);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [hasUnexpiredCharacters]);
 
   return {
     text,
