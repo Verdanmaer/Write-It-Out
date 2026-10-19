@@ -25,6 +25,16 @@ export function Editor({ settings, shouldFocus }: EditorProps) {
     }
   }, [shouldFocus]);
 
+  const visualLayerRef = useRef<HTMLDivElement>(null);
+  function handleScroll(event: React.UIEvent<HTMLTextAreaElement>) {
+    const textarea = event.currentTarget;
+    const visualLayer = visualLayerRef.current;
+
+    if (visualLayer !== null) {
+      visualLayer.style.transform = `translateY(-${textarea.scrollTop}px)`;
+    }
+  }
+
   function handleSelect(event: React.SyntheticEvent<HTMLTextAreaElement>) {
     const textarea = event.currentTarget;
 
@@ -61,6 +71,7 @@ export function Editor({ settings, shouldFocus }: EditorProps) {
         className="pointer-events-none absolute inset-0 whitespace-pre-wrap p-8"
         style={{ fontSize: `${settings.fontSize}px` }}
         aria-hidden="true"
+        ref={visualLayerRef}
       >
         {characters.map((character) => (
           <span
@@ -75,7 +86,7 @@ export function Editor({ settings, shouldFocus }: EditorProps) {
       </div>
 
       <textarea
-        className="absolute inset-0 h-full w-full resize-none bg-transparent p-8 text-transparent caret-black outline-none"
+        className="absolute inset-0 h-full w-full resize-none bg-transparent p-8 text-transparent caret-black outline-none overflow-hidden"
         style={{ fontSize: `${settings.fontSize}px` }}
         value={text}
         ref={textareaRef}
@@ -87,6 +98,7 @@ export function Editor({ settings, shouldFocus }: EditorProps) {
         onMouseDown={(event) => {
           event.preventDefault();
         }}
+        onScroll={handleScroll}
         placeholder="Start writing..."
         spellCheck={false}
         autoFocus

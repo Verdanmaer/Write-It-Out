@@ -55,7 +55,7 @@ export function App() {
   }, []);
 
   return (
-    <main className="h-screen">
+    <main className="h-screen overflow-hidden">
       <Editor settings={editorSettings} shouldFocus={isSettingsOpen === false} />
 
       {isSettingsOpen && (
