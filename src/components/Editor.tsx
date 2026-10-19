@@ -16,6 +16,36 @@ export function Editor({ settings }: EditorProps) {
     lifetime: disappearanceLifetimes[settings.disappearanceSpeed],
   });
 
+  function handleSelect(event: React.SyntheticEvent<HTMLTextAreaElement>) {
+    const textarea = event.currentTarget;
+
+    if (textarea.selectionStart !== textarea.selectionEnd) {
+      textarea.setSelectionRange(textarea.selectionEnd, textarea.selectionEnd);
+    }
+
+    handleCursorChange(event);
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    const isSelectionShortcut =
+      (event.ctrlKey || event.metaKey) && ['a', 'c', 'x'].includes(event.key.toLowerCase());
+
+    const isNavigationKey = [
+      'ArrowLeft',
+      'ArrowRight',
+      'ArrowUp',
+      'ArrowDown',
+      'Home',
+      'End',
+      'PageUp',
+      'PageDown',
+    ].includes(event.key);
+
+    if (isSelectionShortcut || isNavigationKey) {
+      event.preventDefault();
+    }
+  }
+
   return (
     <div className="relative h-full w-full">
       <div
@@ -27,7 +57,7 @@ export function Editor({ settings }: EditorProps) {
           <span
             key={character.id}
             className={`transition-opacity duration-500 ${
-              character.expired ? 'opacity-0' : 'opacity-100'
+              character.expired === true ? 'opacity-0' : 'opacity-100'
             }`}
           >
             {character.value}
@@ -40,9 +70,13 @@ export function Editor({ settings }: EditorProps) {
         style={{ fontSize: `${settings.fontSize}px` }}
         value={text}
         onChange={handleChange}
-        onSelect={handleCursorChange}
+        onSelect={handleSelect}
         onClick={handleCursorChange}
         onKeyUp={handleCursorChange}
+        onKeyDown={handleKeyDown}
+        onMouseDown={(event) => {
+          event.preventDefault();
+        }}
         placeholder="Start writing..."
         spellCheck={false}
         autoFocus
