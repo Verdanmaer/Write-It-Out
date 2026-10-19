@@ -1,8 +1,10 @@
+import { useEffect, useRef } from 'react';
 import { useDisappearingText } from '../hooks/useDisappearingText';
 import { DisappearanceSpeed, EditorSettings } from '../settings/editorSettings';
 
 type EditorProps = {
   settings: EditorSettings;
+  shouldFocus: boolean;
 };
 
 const disappearanceLifetimes = {
@@ -11,10 +13,17 @@ const disappearanceLifetimes = {
   [DisappearanceSpeed.FAST]: 3000,
 };
 
-export function Editor({ settings }: EditorProps) {
+export function Editor({ settings, shouldFocus }: EditorProps) {
   const { text, characters, handleChange, handleCursorChange } = useDisappearingText({
     lifetime: disappearanceLifetimes[settings.disappearanceSpeed],
   });
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (shouldFocus === true) {
+      textareaRef.current?.focus();
+    }
+  }, [shouldFocus]);
 
   function handleSelect(event: React.SyntheticEvent<HTMLTextAreaElement>) {
     const textarea = event.currentTarget;
@@ -69,6 +78,7 @@ export function Editor({ settings }: EditorProps) {
         className="absolute inset-0 h-full w-full resize-none bg-transparent p-8 text-transparent caret-black outline-none"
         style={{ fontSize: `${settings.fontSize}px` }}
         value={text}
+        ref={textareaRef}
         onChange={handleChange}
         onSelect={handleSelect}
         onClick={handleCursorChange}

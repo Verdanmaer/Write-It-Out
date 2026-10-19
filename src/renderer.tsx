@@ -56,7 +56,7 @@ export function App() {
 
   return (
     <main className="h-screen">
-      <Editor settings={editorSettings} />
+      <Editor settings={editorSettings} shouldFocus={isSettingsOpen === false} />
 
       {isSettingsOpen && (
         <EditorSettingsPopup
