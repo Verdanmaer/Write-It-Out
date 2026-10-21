@@ -26,6 +26,44 @@ const createMenu = () => {
       ],
     },
     {
+      label: 'Session',
+      submenu: [
+        {
+          id: 'session-start',
+          label: 'Start session',
+          enabled: true,
+          click: () => {
+            BrowserWindow.getFocusedWindow()?.webContents.send('session:start');
+          },
+        },
+        {
+          id: 'session-pause',
+          label: 'Pause session',
+          enabled: false,
+          click: () => {
+            BrowserWindow.getFocusedWindow()?.webContents.send('session:pause');
+          },
+        },
+        {
+          id: 'session-resume',
+          label: 'Resume session',
+          enabled: false,
+          click: () => {
+            BrowserWindow.getFocusedWindow()?.webContents.send('session:resume');
+          },
+        },
+        { type: 'separator' },
+        {
+          id: 'session-stop',
+          label: 'Stop session',
+          enabled: false,
+          click: () => {
+            BrowserWindow.getFocusedWindow()?.webContents.send('session:stop');
+          },
+        },
+      ],
+    },
+    {
       label: 'View',
       submenu: [
         {
@@ -118,6 +156,32 @@ ipcMain.handle('editor-settings:save', async (_event, settings: unknown) => {
     ),
     'utf8',
   );
+});
+
+ipcMain.on('session:state-change', (_event, status: unknown) => {
+  if (status !== 'idle' && status !== 'running' && status !== 'paused' && status !== 'finished') {
+    return;
+  }
+
+  const menu = Menu.getApplicationMenu();
+
+  if (!menu) {
+    return;
+  }
+
+  const start = menu.getMenuItemById('session-start');
+  const pause = menu.getMenuItemById('session-pause');
+  const resume = menu.getMenuItemById('session-resume');
+  const stop = menu.getMenuItemById('session-stop');
+
+  if (!start || !pause || !resume || !stop) {
+    return;
+  }
+
+  start.enabled = status === 'idle' || status === 'finished';
+  pause.enabled = status === 'running';
+  resume.enabled = status === 'paused';
+  stop.enabled = status === 'running' || status === 'paused';
 });
 
 const createWindow = () => {

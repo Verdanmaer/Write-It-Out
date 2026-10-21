@@ -21,4 +21,48 @@ contextBridge.exposeInMainWorld('electronAPI', {
     fontSize: number;
     disappearanceSpeed: 'slow' | 'medium' | 'fast';
   }) => ipcRenderer.invoke('editor-settings:save', settings),
+
+  onSessionStart: (callback: () => void) => {
+    const listener = () => callback();
+
+    ipcRenderer.on('session:start', listener);
+
+    return () => {
+      ipcRenderer.removeListener('session:start', listener);
+    };
+  },
+
+  onSessionPause: (callback: () => void) => {
+    const listener = () => callback();
+
+    ipcRenderer.on('session:pause', listener);
+
+    return () => {
+      ipcRenderer.removeListener('session:pause', listener);
+    };
+  },
+
+  onSessionResume: (callback: () => void) => {
+    const listener = () => callback();
+
+    ipcRenderer.on('session:resume', listener);
+
+    return () => {
+      ipcRenderer.removeListener('session:resume', listener);
+    };
+  },
+
+  onSessionStop: (callback: () => void) => {
+    const listener = () => callback();
+
+    ipcRenderer.on('session:stop', listener);
+
+    return () => {
+      ipcRenderer.removeListener('session:stop', listener);
+    };
+  },
+
+  setSessionStatus: (status: 'idle' | 'running' | 'paused' | 'finished') => {
+    ipcRenderer.send('session:state-change', status);
+  },
 });

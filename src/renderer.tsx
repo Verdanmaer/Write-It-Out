@@ -2,7 +2,14 @@ import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Editor } from './components/Editor';
 import './index.css';
-import { initialSession, type WritingSession } from './session/session';
+import {
+  initialSession,
+  startSession,
+  pauseSession,
+  resumeSession,
+  stopSession,
+  type WritingSession,
+} from './session/session';
 import { useSessionTimer } from './session/useSessionTimer';
 import { EditorSettings, initialEditorSettings } from './settings/editorSettings';
 import { EditorSettingsPopup } from './components/EditorSettingsPopup';
@@ -53,6 +60,59 @@ export function App() {
       setIsSettingsOpen(true);
     });
   }, []);
+
+  useEffect(() => {
+    const unsubscribeStart = window.electronAPI.onSessionStart(() => {
+      setSession((current) => {
+        if (current.status !== 'idle' && current.status !== 'finished') {
+          return current;
+        }
+
+        return startSession(current);
+      });
+    });
+
+    const unsubscribePause = window.electronAPI.onSessionPause(() => {
+      setSession((current) => {
+        if (current.status !== 'running') {
+          return current;
+        }
+
+        return pauseSession(current);
+      });
+    });
+
+    const unsubscribeResume = window.electronAPI.onSessionResume(() => {
+      setSession((current) => {
+        if (current.status !== 'paused') {
+          return current;
+        }
+
+        return resumeSession(current);
+      });
+    });
+
+    const unsubscribeStop = window.electronAPI.onSessionStop(() => {
+      setSession((current) => {
+        if (current.status !== 'running' && current.status !== 'paused') {
+          return current;
+        }
+
+        return stopSession(current);
+      });
+    });
+
+    return () => {
+      unsubscribeStart();
+      unsubscribePause();
+      unsubscribeResume();
+      unsubscribeStop();
+    };
+  }, []);
+
+  useEffect(() => {
+    window.electronAPI.setSessionStatus(session.status);
+  }, [session.status]);
 
   return (
     <main className="h-screen overflow-hidden">
