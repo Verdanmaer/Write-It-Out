@@ -7,6 +7,9 @@ if (started) {
   app.quit();
 }
 
+type SessionStatus = 'idle' | 'running' | 'paused' | 'finished';
+let currentSessionStatus: SessionStatus = 'idle';
+
 const createMenu = () => {
   const menu = Menu.buildFromTemplate([
     {
@@ -31,25 +34,28 @@ const createMenu = () => {
         {
           id: 'session-start',
           label: 'Start session',
+          accelerator: 'CmdOrCtrl+Enter',
           enabled: true,
           click: () => {
             BrowserWindow.getFocusedWindow()?.webContents.send('session:start');
           },
         },
         {
-          id: 'session-pause',
+          id: 'session-toggle',
           label: 'Pause session',
+          accelerator: 'CmdOrCtrl+Shift+Enter',
           enabled: false,
           click: () => {
-            BrowserWindow.getFocusedWindow()?.webContents.send('session:pause');
-          },
-        },
-        {
-          id: 'session-resume',
-          label: 'Resume session',
-          enabled: false,
-          click: () => {
-            BrowserWindow.getFocusedWindow()?.webContents.send('session:resume');
+            const action =
+              currentSessionStatus === 'running'
+                ? 'session:pause'
+                : currentSessionStatus === 'paused'
+                  ? 'session:resume'
+                  : null;
+
+            if (action) {
+              BrowserWindow.getFocusedWindow()?.webContents.send(action);
+            }
           },
         },
         { type: 'separator' },
@@ -162,25 +168,25 @@ ipcMain.on('session:state-change', (_event, status: unknown) => {
   if (status !== 'idle' && status !== 'running' && status !== 'paused' && status !== 'finished') {
     return;
   }
+  currentSessionStatus = status;
 
   const menu = Menu.getApplicationMenu();
 
-  if (!menu) {
+  if (menu === null) {
     return;
   }
 
   const start = menu.getMenuItemById('session-start');
-  const pause = menu.getMenuItemById('session-pause');
-  const resume = menu.getMenuItemById('session-resume');
+  const toggle = menu.getMenuItemById('session-toggle');
   const stop = menu.getMenuItemById('session-stop');
 
-  if (!start || !pause || !resume || !stop) {
+  if (start === null || toggle === null || stop === null) {
     return;
   }
 
   start.enabled = status === 'idle' || status === 'finished';
-  pause.enabled = status === 'running';
-  resume.enabled = status === 'paused';
+  toggle.enabled = status === 'running' || status === 'paused';
+  toggle.label = status === 'paused' ? 'Resume session' : 'Pause session';
   stop.enabled = status === 'running' || status === 'paused';
 });
 
