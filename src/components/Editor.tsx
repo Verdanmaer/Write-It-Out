@@ -4,7 +4,7 @@ import { DisappearanceSpeed, EditorSettings } from '../settings/editorSettings';
 
 type EditorProps = {
   settings: EditorSettings;
-  shouldFocus: boolean;
+  onRequestFocus: (focus: () => void) => void;
 };
 
 const disappearanceLifetimes = {
@@ -13,17 +13,17 @@ const disappearanceLifetimes = {
   [DisappearanceSpeed.FAST]: 3000,
 };
 
-export function Editor({ settings, shouldFocus }: EditorProps) {
+export function Editor({ settings, onRequestFocus }: EditorProps) {
   const { text, characters, handleChange, handleCursorChange } = useDisappearingText({
     lifetime: disappearanceLifetimes[settings.disappearanceSpeed],
   });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
-    if (shouldFocus === true) {
+    onRequestFocus(() => {
       textareaRef.current?.focus();
-    }
-  }, [shouldFocus]);
+    });
+  }, [onRequestFocus]);
 
   const visualLayerRef = useRef<HTMLDivElement>(null);
   function handleScroll(event: React.UIEvent<HTMLTextAreaElement>) {

@@ -1,4 +1,4 @@
-import { StrictMode, useEffect, useState } from 'react';
+import { StrictMode, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Editor } from './components/Editor';
 import './index.css';
@@ -22,6 +22,7 @@ export function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [isSessionSettingsOpen, setIsSessionSettingsOpen] = useState(false);
+  const focusEditorRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -123,6 +124,10 @@ export function App() {
     );
 
     setIsSessionSettingsOpen(false);
+
+    requestAnimationFrame(() => {
+      focusEditorRef.current?.();
+    });
   };
 
   useEffect(() => {
@@ -131,7 +136,12 @@ export function App() {
 
   return (
     <main className="h-screen overflow-hidden">
-      <Editor settings={editorSettings} shouldFocus={isSettingsOpen === false} />
+      <Editor
+        settings={editorSettings}
+        onRequestFocus={(focus) => {
+          focusEditorRef.current = focus;
+        }}
+      />
 
       {isSettingsOpen && (
         <EditorSettingsPopup
@@ -144,7 +154,12 @@ export function App() {
       {isSessionSettingsOpen && (
         <SessionSettingsPopup
           onStart={handleStartSession}
-          onClose={() => setIsSessionSettingsOpen(false)}
+          onClose={() => {
+            setIsSessionSettingsOpen(false);
+            requestAnimationFrame(() => {
+              document.querySelector('textarea')?.focus();
+            });
+          }}
         />
       )}
     </main>
