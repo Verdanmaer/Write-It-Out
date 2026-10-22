@@ -13,6 +13,7 @@ import {
 import { useSessionTimer } from './session/useSessionTimer';
 import { EditorSettings, initialEditorSettings } from './settings/editorSettings';
 import { EditorSettingsPopup } from './components/EditorSettingsPopup';
+import { SessionSettingsPopup } from './components/SessionSettingsPopup';
 
 export function App() {
   const [session, setSession] = useState<WritingSession>(initialSession);
@@ -20,6 +21,7 @@ export function App() {
   const [editorSettings, setEditorSettings] = useState<EditorSettings>(initialEditorSettings);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [isSessionSettingsOpen, setIsSessionSettingsOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -64,11 +66,11 @@ export function App() {
   useEffect(() => {
     const unsubscribeStart = window.electronAPI.onSessionStart(() => {
       setSession((current) => {
-        if (current.status !== 'idle' && current.status !== 'finished') {
-          return current;
+        if (current.status === 'idle' || current.status === 'finished') {
+          setIsSessionSettingsOpen(true);
         }
 
-        return startSession(current);
+        return current;
       });
     });
 
@@ -110,6 +112,19 @@ export function App() {
     };
   }, []);
 
+  const handleStartSession = (durationMs: number) => {
+    setSession((current) =>
+      startSession({
+        ...current,
+        mode: 'timed',
+        duration: durationMs,
+        remainingTime: durationMs,
+      }),
+    );
+
+    setIsSessionSettingsOpen(false);
+  };
+
   useEffect(() => {
     window.electronAPI.setSessionStatus(session.status);
   }, [session.status]);
@@ -123,6 +138,13 @@ export function App() {
           settings={editorSettings}
           onSettingsChange={setEditorSettings}
           onClose={() => setIsSettingsOpen(false)}
+        />
+      )}
+
+      {isSessionSettingsOpen && (
+        <SessionSettingsPopup
+          onStart={handleStartSession}
+          onClose={() => setIsSessionSettingsOpen(false)}
         />
       )}
     </main>
