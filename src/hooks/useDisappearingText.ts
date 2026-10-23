@@ -78,6 +78,11 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
     cursorIndex.current = event.currentTarget.selectionStart;
   }
 
+  function clearText() {
+    setCharacters([]);
+    cursorIndex.current = 0;
+  }
+
   useEffect(() => {
     if (hasUnexpiredCharacters === false) {
       return;
@@ -127,5 +132,6 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
     characters,
     handleChange,
     handleCursorChange,
+    clearText,
   };
 }

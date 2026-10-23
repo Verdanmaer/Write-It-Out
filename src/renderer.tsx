@@ -14,6 +14,7 @@ import { useSessionTimer } from './session/useSessionTimer';
 import { EditorSettings, initialEditorSettings } from './settings/editorSettings';
 import { EditorSettingsPopup } from './components/EditorSettingsPopup';
 import { SessionSettingsPopup } from './components/SessionSettingsPopup';
+import { SessionSummaryPopup } from './components/SessionSummaryPopup';
 
 export function App() {
   const [session, setSession] = useState<WritingSession>(initialSession);
@@ -23,6 +24,12 @@ export function App() {
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [isSessionSettingsOpen, setIsSessionSettingsOpen] = useState(false);
   const focusEditorRef = useRef<(() => void) | null>(null);
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+  const [summary, setSummary] = useState<{
+    elapsedTime: number;
+    completedNaturally: boolean;
+    wordCount: number;
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -130,6 +137,16 @@ export function App() {
     });
   };
 
+  const handleFinishSession = (wordCount: number) => {
+    setSummary({
+      elapsedTime: Math.max(0, (session.duration ?? 0) - (session.remainingTime ?? 0)),
+      completedNaturally: session.remainingTime === 0,
+      wordCount,
+    });
+
+    setIsSummaryOpen(true);
+  };
+
   useEffect(() => {
     window.electronAPI.setSessionStatus(session.status);
   }, [session.status]);
@@ -141,6 +158,8 @@ export function App() {
         onRequestFocus={(focus) => {
           focusEditorRef.current = focus;
         }}
+        sessionStatus={session.status}
+        onSessionFinished={handleFinishSession}
       />
 
       {isSettingsOpen && (
@@ -158,6 +177,21 @@ export function App() {
             setIsSessionSettingsOpen(false);
             requestAnimationFrame(() => {
               document.querySelector('textarea')?.focus();
+            });
+          }}
+        />
+      )}
+
+      {isSummaryOpen && summary !== null && (
+        <SessionSummaryPopup
+          elapsedTime={summary.elapsedTime}
+          completedNaturally={summary.completedNaturally}
+          wordCount={summary.wordCount}
+          onClose={() => {
+            setIsSummaryOpen(false);
+
+            requestAnimationFrame(() => {
+              focusEditorRef.current?.();
             });
           }}
         />

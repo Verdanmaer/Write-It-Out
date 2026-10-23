@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { useDisappearingText } from '../hooks/useDisappearingText';
 import { DisappearanceSpeed, EditorSettings } from '../settings/editorSettings';
+import type { SessionStatus } from '../session/session';
 
 type EditorProps = {
   settings: EditorSettings;
   onRequestFocus: (focus: () => void) => void;
+  sessionStatus: SessionStatus;
+  onSessionFinished: (wordCount: number) => void;
 };
 
 const disappearanceLifetimes = {
@@ -13,8 +16,23 @@ const disappearanceLifetimes = {
   [DisappearanceSpeed.FAST]: 3000,
 };
 
-export function Editor({ settings, onRequestFocus }: EditorProps) {
-  const { text, characters, handleChange, handleCursorChange } = useDisappearingText({
+function countWords(text: string): number {
+  const trimmedText = text.trim();
+
+  if (trimmedText === '') {
+    return 0;
+  }
+
+  return trimmedText.split(/\s+/).length;
+}
+
+export function Editor({
+  settings,
+  onRequestFocus,
+  sessionStatus,
+  onSessionFinished,
+}: EditorProps) {
+  const { text, characters, handleChange, handleCursorChange, clearText } = useDisappearingText({
     lifetime: disappearanceLifetimes[settings.disappearanceSpeed],
   });
 
@@ -24,6 +42,18 @@ export function Editor({ settings, onRequestFocus }: EditorProps) {
       textareaRef.current?.focus();
     });
   }, [onRequestFocus]);
+
+  const previousStatus = useRef(sessionStatus);
+  useEffect(() => {
+    if (previousStatus.current !== 'finished' && sessionStatus === 'finished') {
+      const wordCount = countWords(text);
+
+      onSessionFinished(wordCount);
+      clearText();
+    }
+
+    previousStatus.current = sessionStatus;
+  }, [sessionStatus, text, onSessionFinished, clearText]);
 
   const visualLayerRef = useRef<HTMLDivElement>(null);
   function handleScroll(event: React.UIEvent<HTMLTextAreaElement>) {
