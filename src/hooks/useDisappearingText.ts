@@ -1,11 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-
-type Character = {
-  id: number;
-  value: string;
-  expiresAt: number;
-  expired: boolean;
-};
+import { TextModel } from '../editor/textModel';
 
 type UseDisappearingTextOptions = {
   lifetime: number;
@@ -14,64 +8,48 @@ type UseDisappearingTextOptions = {
 const MAX_GRACE_PERIOD = 2000;
 const DISTANCE_RADIUS = 40;
 
+function createSnapshot(model: TextModel) {
+  return {
+    text: model.getText(),
+    characters: model.getCharacters().map((character) => ({
+      ...character,
+    })),
+  };
+}
+
 export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const nextId = useRef(0);
+  const [model] = useState(() => new TextModel({ lifetime }));
+  const [snapshot, setSnapshot] = useState(() => createSnapshot(model));
   const cursorIndex = useRef(0);
 
-  const text = characters.map((character) => character.value).join('');
-  const hasUnexpiredCharacters = characters.some((character) => character.expired === false);
+  useEffect(() => {
+    model.setLifetime(lifetime);
+  }, [model, lifetime]);
 
   function handleChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
-    const newText = event.target.value;
+    const newText = event.currentTarget.value;
+    const oldText = model.getText();
+    const selectionStart = event.currentTarget.selectionStart;
 
-    cursorIndex.current = event.target.selectionStart;
+    cursorIndex.current = selectionStart;
 
-    if (newText.length < text.length) {
-      const deletedCharacters = text.length - newText.length;
+    if (newText.length < oldText.length) {
+      const deletedCharacters = oldText.length - newText.length;
 
-      setCharacters((current) => {
-        const result = [...current];
-
-        result.splice(event.target.selectionStart, deletedCharacters);
-
-        return result;
-      });
+      model.delete(selectionStart, deletedCharacters);
+      setSnapshot(createSnapshot(model));
 
       return;
     }
 
-    if (newText.length > text.length) {
-      const insertionIndex = event.target.selectionStart - 1;
-      const insertedText = newText.slice(
-        insertionIndex,
-        insertionIndex + (newText.length - text.length),
-      );
+    if (newText.length > oldText.length) {
+      const insertedLength = newText.length - oldText.length;
+      const insertionIndex = selectionStart - insertedLength;
+      const insertedText = newText.slice(insertionIndex, selectionStart);
 
-      const newCharacters = [...characters];
-
-      newCharacters.splice(
-        insertionIndex,
-        0,
-        ...[...insertedText].map((value) => ({
-          id: nextId.current++,
-          value,
-          expiresAt: Date.now() + lifetime,
-          expired: false,
-        })),
-      );
-
-      setCharacters(newCharacters);
-
-      return;
+      model.insert(insertionIndex, insertedText);
+      setSnapshot(createSnapshot(model));
     }
-
-    setCharacters(
-      characters.map((character, index) => ({
-        ...character,
-        value: newText[index],
-      })),
-    );
   }
 
   function handleCursorChange(event: React.SyntheticEvent<HTMLTextAreaElement>) {
@@ -79,57 +57,51 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
   }
 
   function clearText() {
-    setCharacters([]);
+    model.reset();
     cursorIndex.current = 0;
+    setSnapshot(createSnapshot(model));
   }
 
   useEffect(() => {
+    const hasUnexpiredCharacters = snapshot.characters.some(
+      (character) => character.expired === false,
+    );
+
     if (hasUnexpiredCharacters === false) {
       return;
     }
 
     const interval = setInterval(() => {
       const now = Date.now();
+      let hasChanges = false;
 
-      setCharacters((current) => {
-        let hasChanges = false;
-
-        const updatedCharacters = current.map((character, index) => {
-          if (character.expired === true) {
-            return character;
-          }
-
-          const distance = Math.abs(index - cursorIndex.current);
-          const proximity = Math.max(0, 1 - distance / DISTANCE_RADIUS);
-          const gracePeriod = MAX_GRACE_PERIOD * proximity;
-          const adjustedExpiresAt = character.expiresAt + gracePeriod;
-
-          if (adjustedExpiresAt <= now) {
-            hasChanges = true;
-
-            return {
-              ...character,
-              expired: true,
-            };
-          }
-
-          return character;
-        });
-
-        if (hasChanges === false) {
-          return current;
+      for (const [index, character] of model.getCharacters().entries()) {
+        if (character.expired === true) {
+          continue;
         }
 
-        return updatedCharacters;
-      });
+        const distance = Math.abs(index - cursorIndex.current);
+        const proximity = Math.max(0, 1 - distance / DISTANCE_RADIUS);
+        const gracePeriod = MAX_GRACE_PERIOD * proximity;
+        const adjustedExpiresAt = character.expiresAt + gracePeriod;
+
+        if (adjustedExpiresAt <= now) {
+          model.expireCharacter(character.id);
+          hasChanges = true;
+        }
+      }
+
+      if (hasChanges === true) {
+        setSnapshot(createSnapshot(model));
+      }
     }, 100);
 
     return () => clearInterval(interval);
-  }, [hasUnexpiredCharacters]);
+  }, [model, snapshot.characters]);
 
   return {
-    text,
-    characters,
+    text: snapshot.text,
+    characters: snapshot.characters,
     handleChange,
     handleCursorChange,
     clearText,
