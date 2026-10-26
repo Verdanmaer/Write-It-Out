@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { TextModel } from '../editor/textModel';
+import { TextModel } from '../editor/TextModel';
 
 type UseDisappearingTextOptions = {
   lifetime: number;

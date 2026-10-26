@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { CanvasRenderer } from '../editor/CanvasRenderer';
 import { useDisappearingText } from '../hooks/useDisappearingText';
 import { DisappearanceSpeed, EditorSettings } from '../settings/editorSettings';
 import type { SessionStatus } from '../session/session';
@@ -15,6 +16,9 @@ const disappearanceLifetimes = {
   [DisappearanceSpeed.MEDIUM]: 5000,
   [DisappearanceSpeed.FAST]: 3000,
 };
+
+const EDITOR_PADDING = 32;
+const FONT_FAMILY = 'sans-serif';
 
 function countWords(text: string): number {
   const trimmedText = text.trim();
@@ -37,6 +41,12 @@ export function Editor({
   });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rendererRef = useRef<CanvasRenderer | null>(null);
+  const scrollTopRef = useRef(0);
+
+  const [canvasSizeRevision, setCanvasSizeRevision] = useState(0);
+
   useEffect(() => {
     onRequestFocus(() => {
       textareaRef.current?.focus();
@@ -44,25 +54,89 @@ export function Editor({
   }, [onRequestFocus]);
 
   const previousStatus = useRef(sessionStatus);
+
   useEffect(() => {
     if (previousStatus.current !== 'finished' && sessionStatus === 'finished') {
-      const wordCount = countWords(text);
-
-      onSessionFinished(wordCount);
+      onSessionFinished(countWords(text));
       clearText();
     }
 
     previousStatus.current = sessionStatus;
   }, [sessionStatus, text, onSessionFinished, clearText]);
 
-  const visualLayerRef = useRef<HTMLDivElement>(null);
-  function handleScroll(event: React.UIEvent<HTMLTextAreaElement>) {
-    const textarea = event.currentTarget;
-    const visualLayer = visualLayerRef.current;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const textarea = textareaRef.current;
 
-    if (visualLayer !== null) {
-      visualLayer.style.transform = `translateY(-${textarea.scrollTop}px)`;
+    if (canvas === null || textarea === null) {
+      return;
     }
+
+    const computedStyle = window.getComputedStyle(textarea);
+    const computedLineHeight = Number.parseFloat(computedStyle.lineHeight);
+
+    const renderer = new CanvasRenderer(canvas, {
+      fontSize: settings.fontSize,
+      fontFamily: computedStyle.fontFamily || FONT_FAMILY,
+      padding: EDITOR_PADDING,
+      lineHeight: Number.isNaN(computedLineHeight) ? settings.fontSize * 1.5 : computedLineHeight,
+    });
+
+    rendererRef.current = renderer;
+
+    const resizeObserver = new ResizeObserver(() => {
+      setCanvasSizeRevision((revision) => revision + 1);
+    });
+
+    resizeObserver.observe(canvas);
+
+    return () => {
+      resizeObserver.disconnect();
+      rendererRef.current = null;
+    };
+  }, [settings.fontSize]);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    const textarea = textareaRef.current;
+
+    if (renderer === null || textarea === null) {
+      return;
+    }
+
+    let animationFrameId = 0;
+
+    const draw = () => {
+      const currentRenderer = rendererRef.current;
+      const currentTextarea = textareaRef.current;
+
+      if (currentRenderer === null || currentTextarea === null) {
+        return;
+      }
+
+      currentRenderer.render(characters, currentTextarea.selectionStart, scrollTopRef.current);
+
+      const hasFadingCharacters = characters.some(
+        (character) =>
+          character.fadeStartedAt !== null && performance.now() - character.fadeStartedAt < 500,
+      );
+
+      if (hasFadingCharacters === true) {
+        animationFrameId = requestAnimationFrame(draw);
+      }
+    };
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [characters, canvasSizeRevision]);
+
+  function handleScroll(event: React.UIEvent<HTMLTextAreaElement>) {
+    const nextScrollTop = event.currentTarget.scrollTop;
+
+    scrollTopRef.current = nextScrollTop;
   }
 
   function handleSelect(event: React.SyntheticEvent<HTMLTextAreaElement>) {
@@ -97,27 +171,19 @@ export function Editor({
 
   return (
     <div className="relative h-full w-full">
-      <div
-        className="pointer-events-none absolute inset-0 whitespace-pre-wrap p-8"
-        style={{ fontSize: `${settings.fontSize}px` }}
+      <canvas
+        ref={canvasRef}
+        className="pointer-events-none absolute inset-0 h-full w-full"
         aria-hidden="true"
-        ref={visualLayerRef}
-      >
-        {characters.map((character) => (
-          <span
-            key={character.id}
-            className={`transition-opacity duration-500 ${
-              character.expired === true ? 'opacity-0' : 'opacity-100'
-            }`}
-          >
-            {character.value}
-          </span>
-        ))}
-      </div>
+      />
 
       <textarea
         className="absolute inset-0 h-full w-full resize-none bg-transparent p-8 text-transparent caret-black outline-none overflow-hidden"
-        style={{ fontSize: `${settings.fontSize}px` }}
+        style={{
+          fontSize: `${settings.fontSize}px`,
+          fontFamily: FONT_FAMILY,
+          lineHeight: `${settings.fontSize}px`,
+        }}
         value={text}
         ref={textareaRef}
         onChange={handleChange}

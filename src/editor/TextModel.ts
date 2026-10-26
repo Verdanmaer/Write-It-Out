@@ -3,6 +3,7 @@ export type Character = {
   value: string;
   expiresAt: number;
   expired: boolean;
+  fadeStartedAt: number | null;
 };
 
 type TextModelOptions = {
@@ -46,6 +47,7 @@ export class TextModel {
       value,
       expiresAt: Date.now() + this.lifetime,
       expired: false,
+      fadeStartedAt: null,
     }));
 
     this.characters.splice(index, 0, ...insertedCharacters);
@@ -58,8 +60,9 @@ export class TextModel {
   expireCharacter(id: number): void {
     const character = this.characters.find((item) => item.id === id);
 
-    if (character !== undefined) {
+    if (character !== undefined && character.expired === false) {
       character.expired = true;
+      character.fadeStartedAt = performance.now();
     }
   }
 
