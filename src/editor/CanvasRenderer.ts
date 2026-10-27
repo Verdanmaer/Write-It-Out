@@ -64,54 +64,85 @@ export class CanvasRenderer {
     this.positions.clear();
 
     const availableWidth = Math.max(1, width - padding * 2);
+    const rightEdge = padding + availableWidth;
+
     let x = padding;
     let y = padding;
     let cursorPosition: CharacterPosition = { x, y };
+    let index = 0;
 
-    for (let index = 0; index < characters.length; index += 1) {
+    while (index < characters.length) {
       const character = characters[index];
-
-      this.positions.set(character.id, { x, y });
 
       if (index === cursorIndex) {
         cursorPosition = { x, y };
       }
 
       if (character.value === '\n') {
+        this.positions.set(character.id, { x, y });
         x = padding;
         y += lineHeight;
+        index += 1;
         continue;
       }
 
-      const characterWidth = context.measureText(character.value).width;
+      const isWhitespace = /^\s+$/.test(character.value);
+      let endIndex = index + 1;
 
-      if (x + characterWidth > padding + availableWidth && x > padding) {
+      if (isWhitespace === false) {
+        while (
+          endIndex < characters.length &&
+          characters[endIndex].value !== '\n' &&
+          /^\s+$/.test(characters[endIndex].value) === false
+        ) {
+          endIndex += 1;
+        }
+      }
+
+      const word = characters
+        .slice(index, endIndex)
+        .map((item) => item.value)
+        .join('');
+
+      const wordWidth = context.measureText(word).width;
+
+      if (x + wordWidth > rightEdge && x > padding) {
         x = padding;
         y += lineHeight;
+      }
 
-        this.positions.set(character.id, { x, y });
+      for (let wordIndex = index; wordIndex < endIndex; wordIndex += 1) {
+        const wordCharacter = characters[wordIndex];
 
-        if (index === cursorIndex) {
+        this.positions.set(wordCharacter.id, { x, y });
+
+        if (wordIndex === cursorIndex) {
           cursorPosition = { x, y };
         }
-      }
 
-      if (character.expired === false) {
-        context.globalAlpha = 1;
-        context.fillText(character.value, x, y - scrollTop);
-      } else if (character.fadeStartedAt !== null) {
-        const elapsed = performance.now() - character.fadeStartedAt;
-        const opacity = Math.max(0, 1 - elapsed / FADE_DURATION);
-
-        if (opacity > 0) {
-          context.globalAlpha = opacity;
-          context.fillText(character.value, x, y - scrollTop);
+        if (wordCharacter.value === '\t') {
+          x += context.measureText('    ').width;
+          continue;
         }
+
+        if (wordCharacter.expired === false) {
+          context.globalAlpha = 1;
+          context.fillText(wordCharacter.value, x, y - scrollTop);
+        } else if (wordCharacter.fadeStartedAt !== null) {
+          const elapsed = performance.now() - wordCharacter.fadeStartedAt;
+          const opacity = Math.max(0, 1 - elapsed / FADE_DURATION);
+
+          if (opacity > 0) {
+            context.globalAlpha = opacity;
+            context.fillText(wordCharacter.value, x, y - scrollTop);
+          }
+        }
+
+        context.globalAlpha = 1;
+        x += context.measureText(wordCharacter.value).width;
       }
 
-      context.globalAlpha = 1;
-
-      x += characterWidth;
+      index = endIndex;
     }
 
     if (cursorIndex >= characters.length) {
