@@ -10,7 +10,6 @@ import {
   stopSession,
   type WritingSession,
 } from './session/session';
-import { useSessionTimer } from './session/useSessionTimer';
 import { EditorSettings, initialEditorSettings } from './settings/editorSettings';
 import { EditorSettingsPopup } from './components/EditorSettingsPopup';
 import { SessionSettingsPopup } from './components/SessionSettingsPopup';
@@ -18,7 +17,6 @@ import { SessionSummaryPopup } from './components/SessionSummaryPopup';
 
 export function App() {
   const [session, setSession] = useState<WritingSession>(initialSession);
-  const remainingTime = useSessionTimer({ session, setSession });
   const [editorSettings, setEditorSettings] = useState<EditorSettings>(initialEditorSettings);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
