@@ -56,7 +56,9 @@ export function Editor({
   const previousStatus = useRef(sessionStatus);
 
   useEffect(() => {
-    if (previousStatus.current !== 'finished' && sessionStatus === 'finished') {
+    if (previousStatus.current !== 'running' && sessionStatus === 'running') {
+      clearText();
+    } else if (previousStatus.current !== 'finished' && sessionStatus === 'finished') {
       onSessionFinished(countWords(text));
       clearText();
     }
