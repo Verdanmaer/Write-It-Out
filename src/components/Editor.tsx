@@ -180,7 +180,7 @@ export function Editor({
       />
 
       <textarea
-        className="absolute inset-0 h-full w-full resize-none bg-transparent p-8 text-transparent caret-black outline-none overflow-hidden"
+        className="absolute inset-8 resize-none bg-transparent text-transparent caret-black outline-none overflow-hidden"
         style={{
           fontSize: `${settings.fontSize}px`,
           fontFamily: FONT_FAMILY,
