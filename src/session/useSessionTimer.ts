@@ -6,7 +6,6 @@ interface UseSessionTimerProps {
   setSession: React.Dispatch<React.SetStateAction<WritingSession>>;
 }
 
-// Do we even need this?
 export function useSessionTimer({ session, setSession }: UseSessionTimerProps) {
   const lastTick = useRef<number | null>(null);
 
