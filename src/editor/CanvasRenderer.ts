@@ -105,8 +105,7 @@ export class CanvasRenderer {
         .join('');
 
       const wordWidth = context.measureText(word).width;
-
-      if (x + wordWidth > rightEdge && x > padding) {
+      if (isWhitespace === false && x + wordWidth > rightEdge && x > padding) {
         x = padding;
         y += lineHeight;
       }
