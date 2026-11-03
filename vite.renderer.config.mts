@@ -4,9 +4,4 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
-  },
 });
