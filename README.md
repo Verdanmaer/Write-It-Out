@@ -18,22 +18,10 @@ Start the application in development mode:
 npm start
 ```
 
-Run ESLint:
+Run tests:
 
 ```bash
-npm run lint
-```
-
-Check formatting:
-
-```bash
-npm run format:check
-```
-
-Format the code:
-
-```bash
-npm run format
+npm run test:run
 ```
 
 ## Tech Stack
