@@ -131,7 +131,6 @@ export function App() {
     );
 
     setIsSessionSettingsOpen(false);
-
     requestAnimationFrame(() => {
       focusEditorRef.current?.();
     });
@@ -166,7 +165,12 @@ export function App() {
         <EditorSettingsPopup
           settings={editorSettings}
           onSettingsChange={setEditorSettings}
-          onClose={() => setIsSettingsOpen(false)}
+          onClose={() => {
+            setIsSettingsOpen(false);
+            requestAnimationFrame(() => {
+              focusEditorRef.current?.();
+            });
+          }}
         />
       )}
 
@@ -176,7 +180,7 @@ export function App() {
           onClose={() => {
             setIsSessionSettingsOpen(false);
             requestAnimationFrame(() => {
-              document.querySelector('textarea')?.focus();
+              focusEditorRef.current?.();
             });
           }}
         />
@@ -189,7 +193,6 @@ export function App() {
           wordCount={summary.wordCount}
           onClose={() => {
             setIsSummaryOpen(false);
-
             requestAnimationFrame(() => {
               focusEditorRef.current?.();
             });
