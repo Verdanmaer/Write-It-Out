@@ -112,6 +112,15 @@ export class CanvasRenderer {
 
       for (let wordIndex = index; wordIndex < endIndex; wordIndex += 1) {
         const wordCharacter = characters[wordIndex];
+        const characterWidth =
+          wordCharacter.value === '\t'
+            ? context.measureText('    ').width
+            : context.measureText(wordCharacter.value).width;
+
+        if (isWhitespace === false && x + characterWidth > rightEdge && x > padding) {
+          x = padding;
+          y += lineHeight;
+        }
 
         this.positions.set(wordCharacter.id, { x, y });
 
@@ -120,7 +129,7 @@ export class CanvasRenderer {
         }
 
         if (wordCharacter.value === '\t') {
-          x += context.measureText('    ').width;
+          x += characterWidth;
           continue;
         }
 
@@ -138,7 +147,7 @@ export class CanvasRenderer {
         }
 
         context.globalAlpha = 1;
-        x += context.measureText(wordCharacter.value).width;
+        x += characterWidth;
       }
 
       index = endIndex;
