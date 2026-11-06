@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { CanvasRenderer } from '../editor/CanvasRenderer';
+import { CanvasRenderer } from '../rendering/CanvasRenderer';
 import { useDisappearingText } from '../hooks/useDisappearingText';
 import { DisappearanceSpeed, EditorSettings } from '../settings/editorSettings';
-import type { SessionStatus } from '../session/session';
+import type { SessionStatus } from '../../session/session';
 
 type EditorProps = {
   settings: EditorSettings;

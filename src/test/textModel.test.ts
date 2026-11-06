@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { TextModel } from '../editor/TextModel';
+import { TextModel } from '../editor/model/TextModel';
 
 describe('TextModel', () => {
   let model: TextModel;

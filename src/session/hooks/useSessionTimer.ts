@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { WritingSession } from './session';
+import type { WritingSession } from '../session';
 
 interface UseSessionTimerProps {
   session: WritingSession;

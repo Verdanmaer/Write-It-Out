@@ -1,4 +1,4 @@
-import type { Character } from './TextModel';
+import type { Character } from '../model/TextModel';
 
 type CanvasRendererOptions = {
   fontSize: number;

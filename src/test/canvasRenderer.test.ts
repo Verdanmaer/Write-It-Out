@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CanvasRenderer } from '../editor/CanvasRenderer';
-import type { Character } from '../editor/TextModel';
+import { CanvasRenderer } from '../editor/rendering/CanvasRenderer';
+import type { Character } from '../editor/model/TextModel';
 
 function createCharacter(id: number, value: string, overrides: Partial<Character> = {}): Character {
   return {

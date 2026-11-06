@@ -1,6 +1,6 @@
 import { StrictMode, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Editor } from './components/Editor';
+import { Editor } from './editor/components/Editor';
 import './index.css';
 import {
   initialSession,
@@ -10,11 +10,11 @@ import {
   stopSession,
   type WritingSession,
 } from './session/session';
-import { EditorSettings, initialEditorSettings } from './settings/editorSettings';
-import { EditorSettingsPopup } from './components/EditorSettingsPopup';
-import { SessionSettingsPopup } from './components/SessionSettingsPopup';
-import { SessionSummaryPopup } from './components/SessionSummaryPopup';
-import { useSessionTimer } from './session/useSessionTimer';
+import { EditorSettings, initialEditorSettings } from './editor/settings/editorSettings';
+import { EditorSettingsPopup } from './editor/components/EditorSettingsPopup';
+import { SessionSettingsPopup } from './session/components/SessionSettingsPopup';
+import { SessionSummaryPopup } from './session/components/SessionSummaryPopup';
+import { useSessionTimer } from './session/hooks/useSessionTimer';
 
 export function App() {
   const [session, setSession] = useState<WritingSession>(initialSession);
