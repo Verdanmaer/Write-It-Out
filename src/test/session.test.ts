@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   initialSession,
-  startSession,
   pauseSession,
   resumeSession,
+  startSession,
   stopSession,
   type WritingSession,
 } from '../session/session';

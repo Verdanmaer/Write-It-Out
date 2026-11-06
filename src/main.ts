@@ -1,6 +1,6 @@
-import { app, BrowserWindow, Menu, ipcMain } from 'electron';
-import { readFile, writeFile } from 'node:fs/promises';
+import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import started from 'electron-squirrel-startup';
+import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {

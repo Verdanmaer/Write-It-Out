@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import { act, renderHook } from '@testing-library/react';
+import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { WritingSession } from '../session/session';
 import { useSessionTimer } from '../session/hooks/useSessionTimer';
+import type { WritingSession } from '../session/session';
 
 function useSessionHarness(initialSession: WritingSession) {
   const [session, setSession] = useState(initialSession);
