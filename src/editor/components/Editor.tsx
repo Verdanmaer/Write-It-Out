@@ -12,7 +12,7 @@ type EditorProps = {
 };
 
 const disappearanceLifetimes = {
-  [DisappearanceSpeed.SLOW]: 800000,
+  [DisappearanceSpeed.SLOW]: 8000,
   [DisappearanceSpeed.MEDIUM]: 5000,
   [DisappearanceSpeed.FAST]: 3000,
 };
