@@ -7,16 +7,10 @@ type CanvasRendererOptions = {
   lineHeight: number;
 };
 
-type CharacterPosition = {
-  x: number;
-  y: number;
-};
-
 const FADE_DURATION = 500;
 
 export class CanvasRenderer {
   private context: CanvasRenderingContext2D;
-  private positions = new Map<number, CharacterPosition>();
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -35,7 +29,7 @@ export class CanvasRenderer {
     this.options = options;
   }
 
-  render(characters: readonly Character[], cursorIndex: number, scrollTop: number): void {
+  render(characters: readonly Character[], scrollTop: number): void {
     const { fontSize, padding, lineHeight } = this.options;
     const { canvas } = this;
     const context = this.context;
@@ -61,25 +55,17 @@ export class CanvasRenderer {
     context.textBaseline = 'top';
     context.fillStyle = '#000000';
 
-    this.positions.clear();
-
     const availableWidth = Math.max(1, width - padding * 2);
     const rightEdge = padding + availableWidth;
 
     let x = padding;
     let y = padding;
-    let cursorPosition: CharacterPosition = { x, y };
     let index = 0;
 
     while (index < characters.length) {
       const character = characters[index];
 
-      if (index === cursorIndex) {
-        cursorPosition = { x, y };
-      }
-
       if (character.value === '\n') {
-        this.positions.set(character.id, { x, y });
         x = padding;
         y += lineHeight;
         index += 1;
@@ -122,12 +108,6 @@ export class CanvasRenderer {
           y += lineHeight;
         }
 
-        this.positions.set(wordCharacter.id, { x, y });
-
-        if (wordIndex === cursorIndex) {
-          cursorPosition = { x, y };
-        }
-
         if (wordCharacter.value === '\t') {
           x += characterWidth;
           continue;
@@ -152,11 +132,5 @@ export class CanvasRenderer {
 
       index = endIndex;
     }
-
-    if (cursorIndex >= characters.length) {
-      cursorPosition = { x, y };
-    }
-
-    void cursorPosition;
   }
 }

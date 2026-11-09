@@ -116,7 +116,7 @@ export function Editor({
         return;
       }
 
-      currentRenderer.render(characters, currentTextarea.selectionStart, scrollTopRef.current);
+      currentRenderer.render(characters, scrollTopRef.current);
 
       const hasFadingCharacters = characters.some(
         (character) =>
@@ -181,7 +181,7 @@ export function Editor({
         />
 
         <textarea
-          className="absolute inset-8 resize-none bg-transparent text-transparent caret-black outline-none overflow-hidden"
+          className="absolute inset-8 resize-none bg-transparent text-transparent caret-transparent outline-none overflow-hidden"
           style={{
             fontSize: `${settings.fontSize}px`,
             fontFamily: FONT_FAMILY,
