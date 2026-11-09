@@ -12,7 +12,7 @@ type EditorProps = {
 };
 
 const disappearanceLifetimes = {
-  [DisappearanceSpeed.SLOW]: 8000,
+  [DisappearanceSpeed.SLOW]: 800000,
   [DisappearanceSpeed.MEDIUM]: 5000,
   [DisappearanceSpeed.FAST]: 3000,
 };
@@ -172,35 +172,37 @@ export function Editor({
   }
 
   return (
-    <div className="relative h-full w-full">
-      <canvas
-        ref={canvasRef}
-        className="pointer-events-none absolute inset-0 h-full w-full"
-        aria-hidden="true"
-      />
+    <div className="h-full w-full sm:px-16 sm:py-8 lg:px-32 lg:py-16 2xl:px-64 2xl:py-32">
+      <div className="relative h-full w-full">
+        <canvas
+          ref={canvasRef}
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          aria-hidden="true"
+        />
 
-      <textarea
-        className="absolute inset-8 resize-none bg-transparent text-transparent caret-black outline-none overflow-hidden"
-        style={{
-          fontSize: `${settings.fontSize}px`,
-          fontFamily: FONT_FAMILY,
-          lineHeight: `${settings.fontSize}px`,
-        }}
-        value={text}
-        ref={textareaRef}
-        onChange={handleChange}
-        onSelect={handleSelect}
-        onClick={handleCursorChange}
-        onKeyUp={handleCursorChange}
-        onKeyDown={handleKeyDown}
-        onMouseDown={(event) => {
-          event.preventDefault();
-        }}
-        onScroll={handleScroll}
-        placeholder="Start writing..."
-        spellCheck={false}
-        autoFocus
-      />
+        <textarea
+          className="absolute inset-8 resize-none bg-transparent text-transparent caret-black outline-none overflow-hidden"
+          style={{
+            fontSize: `${settings.fontSize}px`,
+            fontFamily: FONT_FAMILY,
+            lineHeight: `${settings.fontSize}px`,
+          }}
+          value={text}
+          ref={textareaRef}
+          onChange={handleChange}
+          onSelect={handleSelect}
+          onClick={handleCursorChange}
+          onKeyUp={handleCursorChange}
+          onKeyDown={handleKeyDown}
+          onMouseDown={(event) => {
+            event.preventDefault();
+          }}
+          onScroll={handleScroll}
+          placeholder="Start writing..."
+          spellCheck={false}
+          autoFocus
+        />
+      </div>
     </div>
   );
 }
