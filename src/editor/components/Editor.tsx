@@ -181,7 +181,7 @@ export function Editor({
         />
 
         <textarea
-          className="absolute inset-8 resize-none bg-transparent text-transparent caret-transparent outline-none overflow-hidden"
+          className="absolute inset-8 resize-none bg-transparent text-transparent caret-transparent placeholder:text-gray-500 outline-none overflow-hidden"
           style={{
             fontSize: `${settings.fontSize}px`,
             fontFamily: FONT_FAMILY,
@@ -198,7 +198,7 @@ export function Editor({
             event.preventDefault();
           }}
           onScroll={handleScroll}
-          placeholder="Start writing..."
+          placeholder="Your thoughts start here..."
           spellCheck={false}
           autoFocus
         />
