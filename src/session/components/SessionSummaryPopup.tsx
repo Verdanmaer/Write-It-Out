@@ -13,12 +13,22 @@ function formatDuration(milliseconds: number): string {
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
+function calculateWordsPerMinute(wordCount: number, elapsedTime: number): number {
+  if (elapsedTime <= 0) {
+    return 0;
+  }
+
+  return Math.round(wordCount / (elapsedTime / 60000));
+}
+
 export function SessionSummaryPopup({
   elapsedTime,
   completedNaturally,
   wordCount,
   onClose,
 }: SessionSummaryPopupProps) {
+  const wordsPerMinute = calculateWordsPerMinute(wordCount, elapsedTime);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <section
@@ -37,15 +47,22 @@ export function SessionSummaryPopup({
             : 'Your writing session has ended.'}
         </p>
 
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          <div className="rounded-lg bg-neutral-100 p-4">
-            <p className="text-sm text-neutral-500">Time spent</p>
+        <div className="mt-6 grid grid-cols-3 gap-3">
+          <div className="rounded-lg bg-neutral-200 p-4">
+            <p className="text-sm text-neutral-500">Time</p>
             <p className="mt-1 text-2xl font-medium tabular-nums">{formatDuration(elapsedTime)}</p>
           </div>
 
-          <div className="rounded-lg bg-neutral-100 p-4">
-            <p className="text-sm text-neutral-500">Words written</p>
+          <div className="rounded-lg bg-neutral-200 p-4">
+            <p className="text-sm text-neutral-500">Words</p>
             <p className="mt-1 text-2xl font-medium tabular-nums">{wordCount}</p>
+          </div>
+
+          <div className="rounded-lg bg-neutral-200 p-4">
+            <p className="text-sm text-neutral-500">Speed</p>
+            <p className="mt-1 text-2xl font-medium tabular-nums">
+              {wordsPerMinute} <span className="text-sm text-neutral-500">WPM</span>
+            </p>
           </div>
         </div>
 
