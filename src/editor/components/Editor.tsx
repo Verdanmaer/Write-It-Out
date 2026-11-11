@@ -56,7 +56,10 @@ export function Editor({
   const previousStatus = useRef(sessionStatus);
 
   useEffect(() => {
-    if (previousStatus.current !== 'running' && sessionStatus === 'running') {
+    if (
+      (previousStatus.current === 'idle' || previousStatus.current === 'finished') &&
+      sessionStatus === 'running'
+    ) {
       clearText();
     } else if (previousStatus.current !== 'finished' && sessionStatus === 'finished') {
       onSessionFinished(countWords(text));
@@ -171,6 +174,14 @@ export function Editor({
     }
   }
 
+  function handleEditorChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    if (sessionStatus === 'paused') {
+      return;
+    }
+
+    handleChange(event);
+  }
+
   return (
     <div className="h-full w-full sm:px-16 sm:py-8 lg:px-32 lg:py-16 2xl:px-64 2xl:py-32">
       <div className="relative h-full w-full">
@@ -189,7 +200,7 @@ export function Editor({
           }}
           value={text}
           ref={textareaRef}
-          onChange={handleChange}
+          onChange={handleEditorChange}
           onSelect={handleSelect}
           onClick={handleCursorChange}
           onKeyUp={handleCursorChange}
@@ -201,6 +212,7 @@ export function Editor({
           placeholder="Your thoughts start here..."
           spellCheck={false}
           autoFocus
+          disabled={sessionStatus === 'paused'}
         />
       </div>
     </div>
