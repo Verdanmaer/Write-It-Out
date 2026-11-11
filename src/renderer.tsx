@@ -15,6 +15,7 @@ import {
   stopSession,
   type WritingSession,
 } from './session/session';
+import { SessionPausedPopup } from './session/components/SessionPausedPopup';
 
 export function App() {
   const [session, setSession] = useState<WritingSession>(initialSession);
@@ -150,6 +151,20 @@ export function App() {
     window.electronAPI.setSessionStatus(session.status);
   }, [session.status]);
 
+  const handleResumeSession = () => {
+    setSession((current) => {
+      if (current.status !== 'paused') {
+        return current;
+      }
+
+      return resumeSession(current);
+    });
+
+    requestAnimationFrame(() => {
+      focusEditorRef.current?.();
+    });
+  };
+
   return (
     <main className="h-screen overflow-hidden">
       <Editor
@@ -198,6 +213,10 @@ export function App() {
             });
           }}
         />
+      )}
+
+      {session.status === 'paused' && (
+        <SessionPausedPopup remainingTime={remainingTime} onResume={handleResumeSession} />
       )}
     </main>
   );
