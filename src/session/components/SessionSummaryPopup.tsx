@@ -3,6 +3,7 @@ interface SessionSummaryPopupProps {
   completedNaturally: boolean;
   wordCount: number;
   onClose: () => void;
+  onStartAgain: () => void;
 }
 
 function formatDuration(milliseconds: number): string {
@@ -26,6 +27,7 @@ export function SessionSummaryPopup({
   completedNaturally,
   wordCount,
   onClose,
+  onStartAgain,
 }: SessionSummaryPopupProps) {
   const wordsPerMinute = calculateWordsPerMinute(wordCount, elapsedTime);
 
@@ -66,7 +68,16 @@ export function SessionSummaryPopup({
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex gap-3 justify-end">
+          <button
+            type="button"
+            autoFocus
+            onClick={onStartAgain}
+            className="rounded-lg bg-neutral-200 px-4 py-2 text-sm hover:bg-neutral-400"
+          >
+            Start again
+          </button>
+
           <button
             type="button"
             autoFocus

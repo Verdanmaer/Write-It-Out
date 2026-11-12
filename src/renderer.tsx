@@ -137,6 +137,17 @@ export function App() {
     });
   };
 
+  const handleStartAgain = () => {
+    setSession((current) => startSession(current));
+
+    setIsSummaryOpen(false);
+    setSummary(null);
+
+    requestAnimationFrame(() => {
+      focusEditorRef.current?.();
+    });
+  };
+
   const handleFinishSession = (wordCount: number) => {
     setSummary({
       elapsedTime: Math.max(0, (session.duration ?? 0) - (session.remainingTime ?? 0)),
@@ -212,6 +223,7 @@ export function App() {
               focusEditorRef.current?.();
             });
           }}
+          onStartAgain={handleStartAgain}
         />
       )}
 
