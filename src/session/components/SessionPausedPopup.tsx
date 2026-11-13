@@ -1,15 +1,8 @@
+import { formatDuration } from '../utils';
+
 interface SessionPausedPopupProps {
   remainingTime: number;
   onResume: () => void;
-}
-
-// TODO : Duplicate code with SessionSummaryPopup
-function formatDuration(milliseconds: number): string {
-  const totalSeconds = Math.ceil(milliseconds / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-
-  return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
 export function SessionPausedPopup({ remainingTime, onResume }: SessionPausedPopupProps) {
@@ -29,7 +22,9 @@ export function SessionPausedPopup({ remainingTime, onResume }: SessionPausedPop
 
         <div className="mt-6 rounded-lg bg-neutral-200 p-6 text-center">
           <p className="text-sm text-neutral-500">Time remaining</p>
-          <p className="mt-1 text-3xl font-medium tabular-nums">{formatDuration(remainingTime)}</p>
+          <p className="mt-1 text-3xl font-medium tabular-nums">
+            {formatDuration(remainingTime, 'ceil')}
+          </p>
         </div>
 
         <div className="mt-6 flex justify-end">

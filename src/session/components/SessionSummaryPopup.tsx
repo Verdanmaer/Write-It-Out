@@ -1,17 +1,11 @@
+import { formatDuration } from '../utils';
+
 interface SessionSummaryPopupProps {
   elapsedTime: number;
   completedNaturally: boolean;
   wordCount: number;
   onClose: () => void;
   onStartAgain: () => void;
-}
-
-function formatDuration(milliseconds: number): string {
-  const totalSeconds = Math.floor(milliseconds / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-
-  return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
 function calculateWordsPerMinute(wordCount: number, elapsedTime: number): number {
@@ -52,7 +46,9 @@ export function SessionSummaryPopup({
         <div className="mt-6 grid grid-cols-3 gap-3">
           <div className="rounded-lg bg-neutral-200 p-4">
             <p className="text-sm text-neutral-500">Time</p>
-            <p className="mt-1 text-2xl font-medium tabular-nums">{formatDuration(elapsedTime)}</p>
+            <p className="mt-1 text-2xl font-medium tabular-nums">
+              {formatDuration(elapsedTime, 'floor')}
+            </p>
           </div>
 
           <div className="rounded-lg bg-neutral-200 p-4">
@@ -71,7 +67,6 @@ export function SessionSummaryPopup({
         <div className="mt-6 flex gap-3 justify-end">
           <button
             type="button"
-            autoFocus
             onClick={onStartAgain}
             className="rounded-lg bg-neutral-200 px-4 py-2 text-sm hover:bg-neutral-400"
           >
