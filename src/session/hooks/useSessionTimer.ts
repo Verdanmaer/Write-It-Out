@@ -20,7 +20,6 @@ export function useSessionTimer({ session, setSession }: UseSessionTimerProps) {
     const interval = setInterval(() => {
       const now = Date.now();
       const elapsed = now - (lastTick.current ?? now);
-
       lastTick.current = now;
 
       setSession((current) => {

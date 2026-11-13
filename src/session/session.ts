@@ -1,5 +1,4 @@
 export type SessionMode = 'free' | 'timed';
-
 export type SessionStatus = 'idle' | 'running' | 'paused' | 'finished';
 
 export interface WritingSession {

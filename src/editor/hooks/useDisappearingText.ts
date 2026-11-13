@@ -31,7 +31,6 @@ export function useDisappearingText({ lifetime }: UseDisappearingTextOptions) {
     const newText = event.currentTarget.value;
     const oldText = model.getText();
     const selectionStart = event.currentTarget.selectionStart;
-
     cursorIndex.current = selectionStart;
 
     if (newText.length < oldText.length) {

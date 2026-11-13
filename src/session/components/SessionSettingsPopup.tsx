@@ -13,7 +13,6 @@ export function SessionSettingsPopup({ onStart, onClose }: SessionSettingsPopupP
   const [customDuration, setCustomDuration] = useState('20');
 
   const duration = useCustomDuration ? Number(customDuration) : selectedDuration;
-
   const isValidDuration = Number.isInteger(duration) && duration >= 1 && duration <= 120;
 
   const handleStart = () => {

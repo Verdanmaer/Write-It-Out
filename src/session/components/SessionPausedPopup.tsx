@@ -3,6 +3,7 @@ interface SessionPausedPopupProps {
   onResume: () => void;
 }
 
+// TODO : Duplicate code with SessionSummaryPopup
 function formatDuration(milliseconds: number): string {
   const totalSeconds = Math.ceil(milliseconds / 1000);
   const minutes = Math.floor(totalSeconds / 60);
