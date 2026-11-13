@@ -1,11 +1,11 @@
 import type { Character } from '../model/TextModel';
 
-type CanvasRendererOptions = {
+interface CanvasRendererOptions {
   fontSize: number;
   fontFamily: string;
   padding: number;
   lineHeight: number;
-};
+}
 
 const FADE_DURATION = 500;
 

@@ -1,10 +1,10 @@
 import type { DisappearanceSpeed, EditorSettings } from '../settings/editorSettings';
 
-type EditorSettingsPopupProps = {
+interface EditorSettingsPopupProps {
   settings: EditorSettings;
   onSettingsChange: (settings: EditorSettings) => void;
   onClose: () => void;
-};
+}
 
 export function EditorSettingsPopup({
   settings,

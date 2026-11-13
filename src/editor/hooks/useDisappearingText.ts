@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { TextModel } from '../model/TextModel';
 
-type UseDisappearingTextOptions = {
+interface UseDisappearingTextOptions {
   lifetime: number;
-};
+}
 
 const MAX_GRACE_PERIOD = 2000;
 const DISTANCE_RADIUS = 40;

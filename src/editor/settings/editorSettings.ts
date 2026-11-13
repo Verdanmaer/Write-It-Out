@@ -1,15 +1,11 @@
-export enum DisappearanceSpeed {
-  SLOW = 'slow',
-  MEDIUM = 'medium',
-  FAST = 'fast',
-}
+export type DisappearanceSpeed = 'slow' | 'medium' | 'fast';
 
-export type EditorSettings = {
+export interface EditorSettings {
   fontSize: number;
   disappearanceSpeed: DisappearanceSpeed;
-};
+}
 
 export const initialEditorSettings: EditorSettings = {
   fontSize: 18,
-  disappearanceSpeed: DisappearanceSpeed.MEDIUM,
+  disappearanceSpeed: 'medium',
 };

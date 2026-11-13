@@ -1,14 +1,14 @@
-export type Character = {
+export interface Character {
   id: number;
   value: string;
   expiresAt: number;
   expired: boolean;
   fadeStartedAt: number | null;
-};
+}
 
-type TextModelOptions = {
+interface TextModelOptions {
   lifetime: number;
-};
+}
 
 export class TextModel {
   private characters: Character[] = [];

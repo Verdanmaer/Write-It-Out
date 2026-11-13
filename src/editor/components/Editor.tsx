@@ -4,17 +4,17 @@ import { useDisappearingText } from '../hooks/useDisappearingText';
 import { CanvasRenderer } from '../rendering/CanvasRenderer';
 import { DisappearanceSpeed, EditorSettings } from '../settings/editorSettings';
 
-type EditorProps = {
+interface EditorProps {
   settings: EditorSettings;
   onRequestFocus: (focus: () => void) => void;
   sessionStatus: SessionStatus;
   onSessionFinished: (wordCount: number) => void;
-};
+}
 
-const disappearanceLifetimes = {
-  [DisappearanceSpeed.SLOW]: 8000,
-  [DisappearanceSpeed.MEDIUM]: 5000,
-  [DisappearanceSpeed.FAST]: 3000,
+const disappearanceLifetimes: Record<DisappearanceSpeed, number> = {
+  slow: 8000,
+  medium: 5000,
+  fast: 3000,
 };
 
 const EDITOR_PADDING = 32;
