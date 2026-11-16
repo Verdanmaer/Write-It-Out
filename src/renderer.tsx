@@ -4,6 +4,8 @@ import { Editor } from './editor/components/Editor';
 import { EditorSettingsPopup } from './editor/components/EditorSettingsPopup';
 import { EditorSettings, initialEditorSettings } from './editor/settings/editorSettings';
 import './index.css';
+import { FloatingTimer } from './session/components/FloatingTimer';
+import { SessionPausedPopup } from './session/components/SessionPausedPopup';
 import { SessionSettingsPopup } from './session/components/SessionSettingsPopup';
 import { SessionSummaryPopup } from './session/components/SessionSummaryPopup';
 import { useSessionTimer } from './session/hooks/useSessionTimer';
@@ -15,7 +17,6 @@ import {
   stopSession,
   type WritingSession,
 } from './session/session';
-import { SessionPausedPopup } from './session/components/SessionPausedPopup';
 
 export function App() {
   const [session, setSession] = useState<WritingSession>(initialSession);
@@ -186,6 +187,8 @@ export function App() {
         sessionStatus={session.status}
         onSessionFinished={handleFinishSession}
       />
+
+      {session.status === 'running' && <FloatingTimer remainingTime={remainingTime} />}
 
       {isSettingsOpen && (
         <EditorSettingsPopup
