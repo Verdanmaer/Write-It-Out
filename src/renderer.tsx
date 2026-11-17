@@ -1,4 +1,4 @@
-import { StrictMode, useEffect, useRef, useState } from 'react';
+import { StrictMode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Editor } from './editor/components/Editor';
 import { EditorSettingsPopup } from './editor/components/EditorSettingsPopup';
@@ -25,7 +25,8 @@ export function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [isSessionSettingsOpen, setIsSessionSettingsOpen] = useState(false);
-  const focusEditorRef = useRef<(() => void) | null>(null);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+  const wasFocusBlocked = useRef(false);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const [summary, setSummary] = useState<{
     elapsedTime: number;
@@ -133,20 +134,24 @@ export function App() {
     );
 
     setIsSessionSettingsOpen(false);
-    requestAnimationFrame(() => {
-      focusEditorRef.current?.();
-    });
   };
+
+  useLayoutEffect(() => {
+    const isFocusBlocked =
+      isSettingsOpen || isSessionSettingsOpen || isSummaryOpen || session.status === 'paused';
+
+    if (wasFocusBlocked.current === true && isFocusBlocked === false) {
+      editorRef.current?.focus();
+    }
+
+    wasFocusBlocked.current = isFocusBlocked;
+  }, [isSettingsOpen, isSessionSettingsOpen, isSummaryOpen, session.status]);
 
   const handleStartAgain = () => {
     setSession((current) => startSession(current));
 
     setIsSummaryOpen(false);
     setSummary(null);
-
-    requestAnimationFrame(() => {
-      focusEditorRef.current?.();
-    });
   };
 
   const handleFinishSession = (wordCount: number) => {
@@ -171,19 +176,13 @@ export function App() {
 
       return resumeSession(current);
     });
-
-    requestAnimationFrame(() => {
-      focusEditorRef.current?.();
-    });
   };
 
   return (
     <main className="h-screen overflow-hidden">
       <Editor
+        ref={editorRef}
         settings={editorSettings}
-        onRequestFocus={(focus) => {
-          focusEditorRef.current = focus;
-        }}
         sessionStatus={session.status}
         onSessionFinished={handleFinishSession}
       />
@@ -196,9 +195,6 @@ export function App() {
           onSettingsChange={setEditorSettings}
           onClose={() => {
             setIsSettingsOpen(false);
-            requestAnimationFrame(() => {
-              focusEditorRef.current?.();
-            });
           }}
         />
       )}
@@ -208,9 +204,6 @@ export function App() {
           onStart={handleStartSession}
           onClose={() => {
             setIsSessionSettingsOpen(false);
-            requestAnimationFrame(() => {
-              focusEditorRef.current?.();
-            });
           }}
         />
       )}
@@ -222,9 +215,6 @@ export function App() {
           wordCount={summary.wordCount}
           onClose={() => {
             setIsSummaryOpen(false);
-            requestAnimationFrame(() => {
-              focusEditorRef.current?.();
-            });
           }}
           onStartAgain={handleStartAgain}
         />

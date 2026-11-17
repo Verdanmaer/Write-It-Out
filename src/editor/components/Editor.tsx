@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import type { SessionStatus } from '../../session/session';
 import { useDisappearingText } from '../hooks/useDisappearingText';
 import { CanvasRenderer } from '../rendering/CanvasRenderer';
@@ -6,7 +6,6 @@ import { DisappearanceSpeed, EditorSettings } from '../settings/editorSettings';
 
 interface EditorProps {
   settings: EditorSettings;
-  onRequestFocus: (focus: () => void) => void;
   sessionStatus: SessionStatus;
   onSessionFinished: (wordCount: number) => void;
 }
@@ -30,30 +29,22 @@ function countWords(text: string): number {
   return trimmedText.split(/\s+/).length;
 }
 
-export function Editor({
-  settings,
-  onRequestFocus,
-  sessionStatus,
-  onSessionFinished,
-}: EditorProps) {
+export const Editor = forwardRef<HTMLTextAreaElement, EditorProps>(function Editor(
+  { settings, sessionStatus, onSessionFinished },
+  forwardedRef,
+) {
   const { text, characters, handleChange, handleCursorChange, clearText } = useDisappearingText({
     lifetime: disappearanceLifetimes[settings.disappearanceSpeed],
   });
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<CanvasRenderer | null>(null);
   const scrollTopRef = useRef(0);
-
   const [canvasSizeRevision, setCanvasSizeRevision] = useState(0);
-
-  useEffect(() => {
-    onRequestFocus(() => {
-      textareaRef.current?.focus();
-    });
-  }, [onRequestFocus]);
-
   const previousStatus = useRef(sessionStatus);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  useImperativeHandle(forwardedRef, () => textareaRef.current!);
 
   useEffect(() => {
     if (
@@ -217,4 +208,4 @@ export function Editor({
       </div>
     </div>
   );
-}
+});
