@@ -10,7 +10,10 @@ export function FloatingTimer({ remainingTime }: FloatingTimerProps) {
   }
 
   return (
-    <div className="group fixed right-6 top-6 z-50 select-none">
+    <div
+      className="group fixed right-6 top-6 z-50 select-none"
+      onMouseDown={(event) => event.preventDefault()}
+    >
       <div className="flex min-h-8 min-w-8 items-center justify-center">
         <div className="size-3 rounded-full bg-neutral-300 transition-opacity duration-200 group-hover:opacity-0" />
 
